@@ -1,6 +1,6 @@
 {
   "name": "wdio-testrail-service",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "WebdriverIO service for selecting test cases from TestRail",
   "main": "build/app.js",
   "types": "build/app.d.ts",
@@ -21,7 +21,6 @@
   "author": "Brad DerManouelian",
   "license": "MIT",
   "devDependencies": {
-    "@dlenroc/testrail": "^1.7.2",
     "@types/mocha": "^9.1.1",
     "@wdio/cli": "^7.8.0",
     "@wdio/devtools-service": "^8.2.4",
@@ -31,5 +30,8 @@
     "install": "^0.13.0",
     "ts-node": "^10.9.1",
     "typescript": "^4.3.5"
+  },
+  "dependencies": {
+    "@dlenroc/testrail": "^1.7.2"
   }
 }
