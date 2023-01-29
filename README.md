@@ -27,7 +27,7 @@ exports.config = {
   // ...
  services: [
   [
-   testrail,
+   "testrail",
    {
     testrailServer: {
      domain: "https://xxxx.testrail.io",
