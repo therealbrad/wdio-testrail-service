@@ -68,8 +68,10 @@ Array of Priority Names to choose tests from. Use the short name (also called *A
 
 ## Notes
 
+1. Specifying mochaOpts.grep in your config or via cli will override this service completely.
+
 1. The service assume you have a custom Dropdown or Multi-select case field named `automation` with an option named `Automated`. With this case field, any case not marked as `Automated` will be excluded from running.
 
-1. If none of your options match information in TestRail, test cases will not be filtered. For example, when entering a valid Project but invalid Suite, all Suites for the project will be included. If you enter invalid Priorities, all Priorities will be included.
+1. If you enter invalid Priorities, all Priorities will be included.
 
 For more information on WebdriverIO see the [homepage](https://webdriver.io).

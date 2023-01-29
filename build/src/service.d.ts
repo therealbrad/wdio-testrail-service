@@ -5,6 +5,6 @@ export default class TestRailService implements Services.ServiceInstance {
     private _options;
     constructor(_options: TestRailServiceOptions);
     beforeSession(config: Options.Testrunner): Promise<void>;
-    selectCases(api: TestRail): Promise<string[][]>;
+    selectCases(api: TestRail): Promise<string>;
     connectToTestRail(): Promise<TestRail>;
 }

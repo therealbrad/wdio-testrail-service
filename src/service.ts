@@ -1,33 +1,49 @@
 import TestRail, { CaseFilters } from "@dlenroc/testrail";
 import { Options, Services } from "@wdio/types";
 import type { TestRailServiceOptions, TestRailServer } from "./types";
+import logger from "@wdio/logger";
+const log = logger("wdio-testrail-service");
 
 export default class TestRailService implements Services.ServiceInstance {
   constructor(private _options: TestRailServiceOptions) {}
 
   // If a hook returns a promise, WebdriverIO will wait until that promise is resolved to continue.
   async beforeSession(config: Options.Testrunner) {
-    const cases = await this.selectCases(await this.connectToTestRail());
-    const casesRegex = `/${cases.flat().join("|")}/`;
-
+    log.debug("Starting TestRail Service");
+    log.debug(`TestRail Service Options: ${JSON.stringify(this._options)}`);
     if (config.mochaOpts instanceof Object) {
       if (config.mochaOpts.grep) {
-        // User specified cases to run. Ignoring what TestRail says..."
+        log.debug("mochaOpts.grep already defined. Leaving it unchanged.");
       } else {
-        config.mochaOpts["grep"] = casesRegex;
+        log.debug("mochaOpts.grep not defined. Getting cases to run...");
+        config.mochaOpts["grep"] = await this.selectCases(
+          await this.connectToTestRail()
+        );
+        log.debug(`mochaOpts.grep = ${config.mochaOpts.grep}`);
       }
     } else {
-      config.mochaOpts = { grep: casesRegex };
+      log.debug("No mochaOpts defined. Setting mochaOpts.grep...");
+      config.mochaOpts = {
+        grep: await this.selectCases(await this.connectToTestRail()),
+      };
+      log.debug(`mochaOpts.grep = ${config.mochaOpts.grep}`);
     }
+    log.debug("TestRail Service done");
   }
 
   async selectCases(api: TestRail) {
+    log.info("Getting cases from TestRail");
     const caseFields = await api.getCaseFields();
     const automatedId = Number(
       caseFields
         .filter((field) => field.name === "automation")[0]
         .configs[0].options.items?.match(/(\d+), Automated/)?.[1]
     );
+    if (!automatedId) {
+      log.warn(
+        `Either custom field named "automated" or option named "Automated" was not found. Will not filter test cases based on Automation status.`
+      );
+    }
     const allPriorities = await api.getPriorities();
     const automatedCases: string[][] = [];
 
@@ -59,10 +75,17 @@ export default class TestRailService implements Services.ServiceInstance {
         );
       }
     }
-    return automatedCases;
+    if (automatedCases.length === 0) {
+      log.error(
+        `No test case selected! Check your service options:
+        ${JSON.stringify(this._options)}`
+      );
+    }
+    return `/${automatedCases.flat().join("|")}/`;
   }
 
   async connectToTestRail() {
+    log.info("Connecting to TestRail");
     return new TestRail({
       host: this._options.testrailServer.domain,
       username: this._options.testrailServer.username,
