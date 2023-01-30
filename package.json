@@ -33,6 +33,6 @@
   },
   "dependencies": {
     "@dlenroc/testrail": "^1.7.2",
-    "@wdio/logger": "^7.26.0",
+    "@wdio/logger": "^7.26.0"
   }
 }
