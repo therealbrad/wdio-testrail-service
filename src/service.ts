@@ -1,6 +1,5 @@
 import TestRail, { CaseFilters } from "@dlenroc/testrail";
 import { Options, Services } from "@wdio/types";
-import { SevereServiceError } from "webdriverio";
 import type { TestRailServiceOptions, TestRailServer } from "./types";
 import logger from "@wdio/logger";
 const log = logger("wdio-testrail-service");
@@ -69,7 +68,6 @@ export default class TestRailService implements Services.ServiceInstance {
     }
 
     log.info("TestRail Service done");
-    throw new SevereServiceError("Terminating.");
   }
 
   async selectCases(api: TestRail) {
