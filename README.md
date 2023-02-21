@@ -68,9 +68,11 @@ Array of Priority Names to choose tests from. Use the short name (also called *A
 
 ## Notes
 
-1. Specifying mochaOpts.grep in your config or via cli will override this service completely.
-
 1. The service assume you have a custom Dropdown or Multi-select case field named `automation` with an option named `Automated`. With this case field, any case not marked as `Automated` will be excluded from running.
+
+1. The service considers cucumber-like tagging. For example, supplying `mocha-opts.grep "@sanity @smoke"` will only include test cases with either `@sanity` or `@smoke` in the describe or it blocks in addition to filtering by Priority and Automated status.
+
+1. Specifying mochaOpts.grep without a tag (no `@` in the string) will override this service completely.
 
 1. If you enter invalid Priorities, all Priorities will be included.
 

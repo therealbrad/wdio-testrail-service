@@ -1,9 +1,10 @@
 import TestRail, { CaseFilters } from "@dlenroc/testrail";
 import { Options, Services } from "@wdio/types";
+import { SevereServiceError } from "webdriverio";
 import type { TestRailServiceOptions, TestRailServer } from "./types";
 import logger from "@wdio/logger";
 const log = logger("wdio-testrail-service");
-
+var mochaOptsGrepOriginal: String | RegExp;
 export default class TestRailService implements Services.ServiceInstance {
   constructor(private _options: TestRailServiceOptions) {}
 
@@ -11,24 +12,64 @@ export default class TestRailService implements Services.ServiceInstance {
   async beforeSession(config: Options.Testrunner) {
     log.debug("Starting TestRail Service");
     log.debug(`TestRail Service Options: ${JSON.stringify(this._options)}`);
+
     if (config.mochaOpts instanceof Object) {
       if (config.mochaOpts.grep) {
-        log.debug("mochaOpts.grep already defined. Leaving it unchanged.");
+        const originalGrep =
+          config.mochaOpts.grep instanceof RegExp
+            ? config.mochaOpts.grep.source
+            : config.mochaOpts.grep;
+        const tags = originalGrep
+          .split(/[^a-z0-9@]/i)
+          .filter((item) => item.includes("@"));
+        const noTags = originalGrep
+          .split(/[^a-z0-9@]/i)
+          .filter((item) => !item.includes("@") && item.length > 0);
+        if (tags.length > 0) {
+          // log.debug("There are tags");
+          if (noTags.length === 0) {
+            // log.debug("There are only tags");
+            const tr_grep = await this.selectCases(
+              await this.connectToTestRail()
+            );
+            config.mochaOpts["grep"] =
+              "/^(((?!@)|(" +
+              tags.join("|") +
+              ")).)*(" +
+              tr_grep.substring(1, tr_grep.length - 1) +
+              ")/";
+          } else {
+            // log.debug("Mix of tags and no tags");
+            config.mochaOpts["grep"] =
+              "/^(((?!@)|(" +
+              tags.join("|") +
+              ")).)*(" +
+              originalGrep.replace(
+                /^(?:\/|\s)*|\B@[a-z0-9_-]+|(?:\/|\s)*$/gi,
+                ""
+              ) +
+              ")/";
+          }
+        } else {
+          // log.debug(
+          //   "mochaOpts.grep has no tags. Ignoring what TestRail says..."
+          // );
+        }
       } else {
-        log.debug("mochaOpts.grep not defined. Getting cases to run...");
+        // log.debug("No mochaOpts.grep defined. Setting...");
         config.mochaOpts["grep"] = await this.selectCases(
           await this.connectToTestRail()
         );
-        log.debug(`mochaOpts.grep = ${config.mochaOpts.grep}`);
       }
     } else {
-      log.debug("No mochaOpts defined. Setting mochaOpts.grep...");
+      // log.debug("No mochaOpts defined. Setting mochaOpts.grep...");
       config.mochaOpts = {
         grep: await this.selectCases(await this.connectToTestRail()),
       };
-      log.debug(`mochaOpts.grep = ${config.mochaOpts.grep}`);
     }
-    log.debug("TestRail Service done");
+
+    log.info("TestRail Service done");
+    throw new SevereServiceError("Terminating.");
   }
 
   async selectCases(api: TestRail) {
