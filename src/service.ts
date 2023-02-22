@@ -24,7 +24,7 @@ export default class TestRailService implements Services.ServiceInstance {
         const noTags = originalGrep
           .split(/[^a-z0-9@]/i)
           .filter((item) => !item.includes("@") && item.length > 0);
-        if (tags.length > 0) {
+        if (tags.length > 0 && !config.mochaOpts.invert) {
           // log.debug("There are tags");
           if (noTags.length === 0) {
             // log.debug("There are only tags");
@@ -68,6 +68,7 @@ export default class TestRailService implements Services.ServiceInstance {
     }
 
     log.info("TestRail Service done");
+    log.debug(`Updated mochaOpts.grep: $(config.mochaOpts.grep)`);
   }
 
   async selectCases(api: TestRail) {
