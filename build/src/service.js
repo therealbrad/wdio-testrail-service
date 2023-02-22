@@ -13,7 +13,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const testrail_1 = __importDefault(require("@dlenroc/testrail"));
-const webdriverio_1 = require("webdriverio");
 const logger_1 = __importDefault(require("@wdio/logger"));
 const log = (0, logger_1.default)("wdio-testrail-service");
 var mochaOptsGrepOriginal;
@@ -77,7 +76,6 @@ class TestRailService {
                 };
             }
             log.info("TestRail Service done");
-            throw new webdriverio_1.SevereServiceError("Terminating.");
         });
     }
     selectCases(api) {
