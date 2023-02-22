@@ -37,9 +37,9 @@ class TestRailService {
                         .split(/[^a-z0-9@]/i)
                         .filter((item) => !item.includes("@") && item.length > 0);
                     if (tags.length > 0 && !config.mochaOpts.invert) {
-                        // log.debug("There are tags");
+                        log.debug("There are tags");
                         if (noTags.length === 0) {
-                            // log.debug("There are only tags");
+                            log.debug("There are only tags");
                             const tr_grep = yield this.selectCases(yield this.connectToTestRail());
                             config.mochaOpts["grep"] =
                                 "/^(((?!@)|(" +
@@ -49,34 +49,34 @@ class TestRailService {
                                     ")/";
                         }
                         else {
-                            // log.debug("Mix of tags and no tags");
+                            log.debug("Mix of tags and no tags");
                             config.mochaOpts["grep"] =
                                 "/^(((?!@)|(" +
                                     tags.join("|") +
                                     ")).)*(" +
-                                    originalGrep.replace(/^(?:\/|\s)*|\B@[a-z0-9_-]+|(?:\/|\s)*$/gi, "") +
+                                    originalGrep
+                                        .replace(/^(?:\/|\s)*|\B@[a-z0-9_-]+|(?:\/|\s)*$/gi, "")
+                                        .trim() +
                                     ")/";
                         }
                     }
                     else {
-                        // log.debug(
-                        //   "mochaOpts.grep has no tags. Ignoring what TestRail says..."
-                        // );
+                        log.debug("mochaOpts.grep supplied without tags. Ignoring what TestRail says...");
                     }
                 }
                 else {
-                    // log.debug("No mochaOpts.grep defined. Setting...");
+                    log.debug("No mochaOpts.grep defined. Setting...");
                     config.mochaOpts["grep"] = yield this.selectCases(yield this.connectToTestRail());
                 }
             }
             else {
-                // log.debug("No mochaOpts defined. Setting mochaOpts.grep...");
+                log.debug("No mochaOpts defined. Setting mochaOpts.grep...");
                 config.mochaOpts = {
                     grep: yield this.selectCases(yield this.connectToTestRail()),
                 };
             }
             log.info("TestRail Service done");
-            log.debug(`Updated mochaOpts.grep: $(config.mochaOpts.grep)`);
+            log.debug(`Updated mochaOpts.grep: ${config.mochaOpts.grep}`);
         });
     }
     selectCases(api) {
